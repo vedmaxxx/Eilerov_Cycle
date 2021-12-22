@@ -176,5 +176,12 @@ namespace RGR
         }
 
 
+        /*        public void fillAdjacencyList(int numberV, List<Edge> E, int[,] AMatrix, List<Tuple<int,int>> AList)
+                {
+                    for(int i = 0; i < numberV; i++)
+                    {
+                        AList.Add(new Tuple<int, int>(E[i].v1, E[i].v2));
+                    }
+                }*/
     }
 }

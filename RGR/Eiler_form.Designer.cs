@@ -1,6 +1,6 @@
 ﻿namespace RGR
 {
-    partial class DFS_Form
+    partial class Eiler_form
     {
         /// <summary>
         /// Обязательная переменная конструктора.
@@ -96,14 +96,14 @@
             this.listBox_Matrix.HorizontalScrollbar = true;
             this.listBox_Matrix.Location = new System.Drawing.Point(445, 25);
             this.listBox_Matrix.Name = "listBox_Matrix";
-            this.listBox_Matrix.Size = new System.Drawing.Size(271, 173);
+            this.listBox_Matrix.Size = new System.Drawing.Size(464, 173);
             this.listBox_Matrix.TabIndex = 5;
             // 
             // resultBox
             // 
             this.resultBox.Location = new System.Drawing.Point(440, 415);
             this.resultBox.Name = "resultBox";
-            this.resultBox.Size = new System.Drawing.Size(248, 20);
+            this.resultBox.Size = new System.Drawing.Size(469, 20);
             this.resultBox.TabIndex = 6;
             // 
             // btn_DFS
@@ -138,7 +138,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(730, 450);
+            this.ClientSize = new System.Drawing.Size(920, 450);
             this.Controls.Add(this.listBox_Matrix_lbl);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.btn_DFS);
@@ -150,7 +150,7 @@
             this.Controls.Add(this.Btn_drawVert);
             this.Controls.Add(this.sheet);
             this.Name = "DFS_Form";
-            this.Text = "DFS";
+            this.Text = "Eiler Cycle";
             ((System.ComponentModel.ISupportInitialize)(this.sheet)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

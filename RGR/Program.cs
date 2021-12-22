@@ -16,7 +16,7 @@ namespace RGR
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new DFS_Form());
+            Application.Run(new Eiler_form());
         }
     }
 }

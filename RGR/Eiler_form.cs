@@ -11,9 +11,9 @@ using System.IO;
 
 namespace RGR
 {
-    public partial class DFS_Form : Form
+    public partial class Eiler_form : Form
     {
-        public DFS_Form()
+        public Eiler_form()
         {
             InitializeComponent();
             V = new List<Vertex>();
@@ -25,6 +25,7 @@ namespace RGR
         List<Vertex> V;
         List<Edge> E;
         int[,] AMatrix;     //матрица смежности
+        List<int> resultList;
         const int INFINITY = 999;
 
         int selected1;      //выбранные вершины, для соединения линиями
@@ -235,7 +236,24 @@ namespace RGR
                 }
             }
         }
+        //возвращает первую смежную с num_v вершину
+        int getAdjacency(int numberV, int num_v, int[,] matrix)
+        {
+            for (int i = 0; i < numberV; i++)
+                if (matrix[num_v, i] != 0)
+                    return i;
+            return -1;
+        }
+        //возвращает степень вершины num_v
+        int getDegree(int numberV, int num_v, int[,] matrix)
+        {
+            int degree = 0;
+            for(int i = 0; i < numberV; i++)
+                if (matrix[num_v, i] != 0) 
+                    degree++;
 
+            return degree;
+        }
         //вывод матрицы смежности
         private void createMatA_output()
         {
@@ -281,52 +299,8 @@ namespace RGR
             }
         }
 
-        /*private void BFS(object sender, EventArgs e)
-        {
-            string res = " ";
-            if (V.Count == 0)
-            {
-                res = "а граф-то пустой";
-                resultBox.Text = res;
-                return;
-            }
-            AMatrix = new int[V.Count, V.Count];
-            G.fillIncidenceMatrix(V.Count, E, AMatrix);
-            Queue<Vertex> q = new Queue<Vertex>();
-            
-            char c = startVert.Text[0];
-            int u = c - '1';                //индексация вершин
-            Vertex vert = V[u];         //
-            bool[] used = new bool[V.Count];
-            // res = vert.num.ToString();
-
-            used[u] = true;             //пометили стартовую вершину как помеченную - пометили стартову вершину.
-            q.Enqueue(vert);            //занесли вершину в очередь
-
-            while (q.Count != 0)
-            {
-                vert = q.Peek();        
-                q.Dequeue();            //выкинули из очереди
-
-                for(int i = 0; i < V.Count; i++)
-                {
-                    if (Convert.ToBoolean(AMatrix[vert.num-1, i]))      //vert.num-1 потому что в num индексация с единицы, а здесь - с нуля
-                    {
-                        if (!used[i])
-                        {
-                            used[i] = true;
-                            q.Enqueue(V[i]); 
-                            res = res + " " + V[i].num.ToString();
-                        }
-                    }
-                }
-
-            }
-            resultBox.Text = res;
-        }*/
-
-
-
+        //возвращает первую смежную с num_v вершину
+  
 
         void Eiler(object sender, EventArgs e)
         {
@@ -339,151 +313,116 @@ namespace RGR
             }
 
             int[,] matrix = new int[V.Count, V.Count];
-            G.fillAdjacencyMatrix(V.Count, E, matrix);
-
             int[,] a = new int[V.Count, V.Count];
-            G.fillAdjacencyMatrix(V.Count, E, a);
-
+            int nechet_degree = 0;
             int start = 0;
+            Stack<int> res_stack = new Stack<int>();
+            Stack<int> stack = new Stack<int>();
             
 
-            Stack<int> c = new Stack<int>();
-            int degree = 0;
-            bool[] marks = new bool[V.Count];
+            G.fillAdjacencyMatrix(V.Count, E, matrix);
+            G.fillAdjacencyMatrix(V.Count, E, a);
 
-            DFS(marks);
-            for (int i = 0; i < V.Count; i++)
-            {
-                if (!marks[i])
-                {
-                    res = "граф несвязный"; resultBox.Text = res; return;
-                }
-            }
+            resultList = new List<int>();
 
-            int[] Step = new int[V.Count];          //вершина-степень
-            for (int i = 0; i < V.Count; i++)
-            {
-                for (int j = 0; j < V.Count; j++)
-                {
-                    if (matrix[i, j] == 1)
-                    {
-                        Step[i] += 1;
-                    }
-                }
-                if (Step[i] % 2 == 1) degree++;
-            }
-
-            if (degree > 2 || degree == 1)
-            {
-                res = "Нет ни цикла, ни цепи";
+            //поиск в глубину
+            DFS(resultList, start);
+            if (resultList.Count != V.Count) 
+            { 
+                res = "Граф несвязный - он не содержит Эйлерова цикла";
                 resultBox.Text = res;
                 return;
             }
-            if (degree == 0)
-            {
-                res = res + "Цикл:";
-            }
-            else
-            {
-                if (degree == 2)
-                {
-                    start = -1;
-                    res = res + "Цепь:";
-                    for (int i = 0; i < V.Count; i++)
-                    {
-                        if (Step[i] % 2 == 1)
-                        {
-                            if (start == -1) { start = i; }
 
-                        }
-                    }
+            //перебор всех вершин
+            for (int i = 0; i < V.Count; i++)
+            {
+                int tmp = getDegree(V.Count, i, matrix);
+                if (tmp % 2 == 1) 
+                    nechet_degree++;
+
+                if (nechet_degree != 0)
+                {
+                    res = "Нет Эйлерова цикла: не все вершины имеют четную степень";
+                    resultBox.Text = res;
+                    return;
                 }
             }
 
-            SearchG(start, ref a, ref c);
-            //while (c.Count != 0)
-
-            void SearchG(int v, ref int[,] a_, ref Stack<int> c_) //во вложенном классе
+            //сам алгоритм поиска Эйлерова цикла
+            stack.Push(start);
+            while(stack.Count != 0)
             {
-                for (int i = 0; i < V.Count; i++)
+                int node = stack.Peek();
+                if (getDegree(V.Count, node, matrix) != 0)
                 {
-                    if (a_[v, i] != 0)
-                    {
-                        a_[v, i] = 0; a_[i, v] = 0;
-                        SearchG(i, ref a_, ref c_);
-                    }
+                    int u = getAdjacency(V.Count, node, matrix);
+                    stack.Push(u);
+                    matrix[node, u] = 0;
+                    matrix[u, node] = 0;
                 }
-                c_.Push(v);
+                else res_stack.Push(stack.Pop());
             }
 
-            while (c.Count != 0)
-            {
-                res = res + ((int)c.Pop() + 1).ToString();
-            }
+            while (res_stack.Count != 0)
+                res += (res_stack.Pop() + 1).ToString() + " ";
+
             resultBox.Text = res;
         }
 
 
-        private void DFS(bool[] marks)
+        private bool isEdgeExist(int[,] matrix, int v1, int v2)
         {
-            //string res = " ";
-            /*if (V.Count == 0)
-            {
-                res = "а граф-то пустой";
-                resultBox.Text = res;
-                return;
-            }*/
+            if (matrix[v1, v2] != INFINITY && matrix[v1, v2] != 0)
+                return true;
+            else
+                return false;
+        }
+
+        private void DFS(List<int> list, int _start)
+        {
             AMatrix = new int[V.Count, V.Count];
+            //заполняем матрицу смежности в соответствии с графом
             G.fillAdjacencyMatrix(V.Count, E, AMatrix);
 
-            /*int start = Int32.Parse(startVert.Text); //номер стартовой вершины, заданной в поле startVert
-            if (start > V.Count || start <= 0)
-            {
-                MessageBox.Show("Введите корректное значение начальной вершины");
-                startVert.Text = "1";
-                return;
-            }
-            start--;    //индексация с нуля*/
-            int start = 0;
+            //в start заносим номер стартовой вершины, заданной в поле startVert
+            
+            //пользователь вводит числа в диапазоне [1, бесконечность)
+            //но в программе индексация происходит с нуля
 
+            //индексация с нуля
+
+            //стек смежных вершин
             Stack<int> stack = new Stack<int>();
-            //bool[] marks = new bool[V.Count];
-            bool[] stack_marks = new bool[V.Count];
-            for (int i = 0; i < V.Count; i++)
-            {
-                marks[i] = false;
-                stack_marks[i] = false;
-            }
-            //res = startVert.Text;
-            stack.Push(start);
-            int prom;
+            //список обработанных вершин (вывод)
 
+
+            //заносим в стек стартовую вершину
+            stack.Push(_start);
+            //stack.Push();
+            int prom;
+            //пока стек не пуст
             while (stack.Count != 0)
             {
-
+                //извлекаем вершину из стека и обрабатываем её
                 prom = stack.Pop();
-
-                if (marks[prom] != true)    //если вершина не помечена
+                //если вершина не помечена
+                if (!resultList.Contains(prom))
                 {
+                    //ищем смежные вершины
                     for (int i = V.Count - 1; i >= 0; i--)
-                        if (AMatrix[prom, i] != 0 && AMatrix[prom, i] != INFINITY && marks[i] == false)
+                        //если смежная
+                        if (isEdgeExist(AMatrix, prom, i))
                         {
-                            if (stack_marks[i] == false)
+                            //если смежная вершина не была обработана, заносим её в стек
+                            if (!resultList.Contains(i))
                             {
-                                stack.Push(i);              //обрабатываем смежные вершины и кидаем их в стек
-                                stack_marks[i] = true;
+                                stack.Push(i);
                             }
-
                         }
-                    marks[prom] = true;
-                    //помечаем вершину как обработанную
+                    list.Add(prom);
                 }
-                //res = res + (prom + 1).ToString() + " ";
-
             }
-
-            //resultBox.Text = res;
         }
     }
-    //это dfs
 }
